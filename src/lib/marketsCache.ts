@@ -4,6 +4,7 @@
 
 import { fetchLiquidMarkets, type Market } from "./kalshi";
 import { seedQuotes } from "./priceCache";
+import { log } from "./logger";
 
 const TTL_MS = 30_000;
 let cached: { at: number; markets: Market[] } | null = null;
@@ -19,6 +20,7 @@ export async function getMarkets(): Promise<Market[]> {
       return markets;
     })
     .catch((e) => {
+      log.warn("kalshi.markets.fetch_failed", { error: String(e), servedStale: !!cached });
       if (cached) return cached.markets; // serve last-good on upstream failure
       throw e;
     })

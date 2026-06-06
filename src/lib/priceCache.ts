@@ -5,6 +5,7 @@
 
 import { config } from "./config";
 import { fetchQuotes, type Quote } from "./kalshi";
+import { log } from "./logger";
 
 const cache = new Map<string, Quote>();
 const pending = new Map<string, Promise<void>>(); // ticker -> in-flight refresh
@@ -23,8 +24,9 @@ async function refresh(tickers: string[]): Promise<void> {
       .then((quotes) => {
         for (const q of quotes) cache.set(q.ticker, q);
       })
-      .catch(() => {
-        /* keep last-good; the entry's age will grow and mark it stale */
+      .catch((e) => {
+        // keep last-good; the entry's age will grow and mark it stale
+        log.warn("kalshi.prices.refresh_failed", { count: need.length, error: String(e) });
       })
       .finally(() => {
         for (const t of need) pending.delete(t);

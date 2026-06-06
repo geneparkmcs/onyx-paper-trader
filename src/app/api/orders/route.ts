@@ -3,6 +3,7 @@ import { getUserId } from "@/lib/auth";
 import { orderSchema } from "@/lib/validation";
 import { placeOrder } from "@/lib/orders";
 import { prisma } from "@/lib/db";
+import { log } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   const userId = await getUserId();
@@ -15,6 +16,15 @@ export async function POST(req: NextRequest) {
   }
 
   const r = await placeOrder(userId, parsed.data);
+  log.info("order", {
+    userId,
+    ticker: parsed.data.ticker,
+    side: parsed.data.side,
+    qty: parsed.data.qty,
+    status: r.status,
+    fillPriceCents: r.status === "filled" ? r.fill.fillPriceCents : undefined,
+    costCents: r.status === "filled" ? r.fill.costCents : undefined,
+  });
   switch (r.status) {
     case "filled":
       return NextResponse.json(

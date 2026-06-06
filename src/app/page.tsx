@@ -16,6 +16,7 @@ export default function MarketsPage() {
   });
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
+  const [sort, setSort] = useState<"volume" | "closing" | "chance-high" | "chance-low">("volume");
   const [limit, setLimit] = useState(PAGE);
 
   const markets = data?.markets ?? [];
@@ -40,7 +41,23 @@ export default function MarketsPage() {
     });
   }, [markets, q, cat]);
 
-  const shown = filtered.slice(0, limit);
+  const sorted = useMemo(() => {
+    const chance = (m: Market) => m.quote.lastCents ?? m.quote.yesAskCents ?? 0;
+    const closeMs = (m: Market) => (m.closeTime ? new Date(m.closeTime).getTime() : Infinity);
+    const arr = [...filtered];
+    switch (sort) {
+      case "closing":
+        return arr.sort((a, b) => closeMs(a) - closeMs(b));
+      case "chance-high":
+        return arr.sort((a, b) => chance(b) - chance(a));
+      case "chance-low":
+        return arr.sort((a, b) => chance(a) - chance(b));
+      default:
+        return arr.sort((a, b) => b.volume - a.volume);
+    }
+  }, [filtered, sort]);
+
+  const shown = sorted.slice(0, limit);
   const { quotes } = usePrices(shown.map((m) => m.ticker));
 
   return (
@@ -54,15 +71,28 @@ export default function MarketsPage() {
       </div>
 
       <div className="flex flex-col gap-3 mb-4">
-        <input
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setLimit(PAGE);
-          }}
-          placeholder="Search markets, teams, topics…"
-          className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm outline-none focus:border-neutral-600 placeholder:text-neutral-600"
-        />
+        <div className="flex gap-2">
+          <input
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setLimit(PAGE);
+            }}
+            placeholder="Search markets, teams, topics…"
+            className="flex-1 rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm outline-none focus:border-neutral-600 placeholder:text-neutral-600"
+          />
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as typeof sort)}
+            className="rounded-lg bg-neutral-900 border border-neutral-800 px-3 py-2.5 text-sm outline-none focus:border-neutral-600 text-neutral-300"
+            aria-label="Sort markets"
+          >
+            <option value="volume">Most traded</option>
+            <option value="closing">Closing soon</option>
+            <option value="chance-high">Highest chance</option>
+            <option value="chance-low">Lowest chance</option>
+          </select>
+        </div>
         <div className="flex gap-2 flex-wrap">
           <Chip active={cat === null} onClick={() => setCat(null)}>
             All
