@@ -140,6 +140,16 @@ export async function fetchLiquidMarkets(target = 300, maxPages = 2): Promise<Ma
   return out.slice(0, target);
 }
 
+/** Fetch a single market by ticker (used for detail pages of markets not in the browse set). */
+export async function fetchMarket(ticker: string): Promise<Market | null> {
+  const data = (await kalshiGet(`/markets/${encodeURIComponent(ticker)}`, {})) as {
+    market?: RawMarket;
+  };
+  const m = data.market;
+  if (!m) return null;
+  return toMarket(m, { title: m.title, category: m.category }, Date.now());
+}
+
 /** Batch-fetch quotes for specific tickers in a single Kalshi call (DESIGN.md §1). */
 export async function fetchQuotes(tickers: string[]): Promise<Quote[]> {
   if (tickers.length === 0) return [];
