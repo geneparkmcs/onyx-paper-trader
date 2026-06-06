@@ -7,6 +7,7 @@ import { fetcher, type Market } from "@/lib/client";
 import { usePrices } from "@/lib/usePrices";
 import { OrderTicket } from "@/components/OrderTicket";
 import { LivePrice } from "@/components/LivePrice";
+import { Sparkline } from "@/components/Sparkline";
 import { probPct, compactNumber, priceCents } from "@/lib/format";
 
 type Me = { user: { id: string; username: string; balanceCents: number } | null };
@@ -20,7 +21,13 @@ export default function MarketDetailPage() {
     fetcher,
   );
   const { data: me } = useSWR<Me>("/api/auth/me", fetcher, { shouldRetryOnError: false });
+  const { data: hist } = useSWR<{ points: { ts: number; yesCents: number }[] }>(
+    `/api/markets/${encodeURIComponent(ticker)}/history`,
+    fetcher,
+    { refreshInterval: 60_000 },
+  );
   const { quotes } = usePrices([ticker]);
+  const points = hist?.points ?? [];
 
   const market = data?.market;
   const live = quotes[ticker];
@@ -83,6 +90,21 @@ export default function MarketDetailPage() {
                   <> · closes {new Date(market.closeTime).toLocaleDateString()}</>
                 )}
               </div>
+            </div>
+
+            <div className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs uppercase tracking-wide text-neutral-500">
+                  Price history · 7d (YES)
+                </span>
+                {points.length >= 2 && (
+                  <span className="text-xs text-neutral-500 font-mono">
+                    low {Math.min(...points.map((p) => p.yesCents))}¢ · high{" "}
+                    {Math.max(...points.map((p) => p.yesCents))}¢
+                  </span>
+                )}
+              </div>
+              <Sparkline points={points} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

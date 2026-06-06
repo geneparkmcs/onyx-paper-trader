@@ -158,7 +158,8 @@ export function OrderTicket({
       </label>
       <div className="flex items-center gap-2 mb-4">
         <button
-          onClick={() => setQty((q) => Math.max(1, q - 10))}
+          type="button"
+          onClick={() => setQty((q) => Math.max(1, q - 1))}
           className="h-9 w-9 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800"
         >
           −
@@ -171,7 +172,8 @@ export function OrderTicket({
           className="flex-1 rounded-lg bg-neutral-950 border border-neutral-800 px-3 py-2 text-center font-mono outline-none focus:border-neutral-600"
         />
         <button
-          onClick={() => setQty((q) => q + 10)}
+          type="button"
+          onClick={() => setQty((q) => q + 1)}
           className="h-9 w-9 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800"
         >
           +

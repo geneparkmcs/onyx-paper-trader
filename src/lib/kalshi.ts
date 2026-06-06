@@ -160,6 +160,49 @@ export async function fetchQuotes(tickers: string[]): Promise<Quote[]> {
   return (data.markets ?? []).map((m) => toQuote(m, fetchedAt));
 }
 
+export type HistoryPoint = { ts: number; yesCents: number };
+
+type RawCandle = {
+  end_period_ts?: number;
+  price?: { close_dollars?: string | number };
+  yes_bid?: { close_dollars?: string | number };
+  yes_ask?: { close_dollars?: string | number };
+};
+
+/**
+ * Price history (YES, in cents) for a market via Kalshi candlesticks. Carries the last
+ * known price forward across quiet buckets so the line never breaks. The series ticker is
+ * the first segment of the market ticker (KXCITRINI-28JUL01 -> KXCITRINI).
+ */
+export async function fetchHistory(
+  ticker: string,
+  { lookbackSec = 7 * 86400, intervalMin = 60 }: { lookbackSec?: number; intervalMin?: number } = {},
+): Promise<HistoryPoint[]> {
+  const series = ticker.split("-")[0];
+  const end = Math.floor(Date.now() / 1000);
+  const start = end - lookbackSec;
+  const data = (await kalshiGet(`/series/${series}/markets/${encodeURIComponent(ticker)}/candlesticks`, {
+    start_ts: String(start),
+    end_ts: String(end),
+    period_interval: String(intervalMin),
+  })) as { candlesticks?: RawCandle[] };
+
+  const points: HistoryPoint[] = [];
+  let last: number | null = null;
+  for (const c of data.candlesticks ?? []) {
+    const close = dollarsToCents(c.price?.close_dollars);
+    const bid = dollarsToCents(c.yes_bid?.close_dollars);
+    const ask = dollarsToCents(c.yes_ask?.close_dollars);
+    const mid = bid != null && ask != null ? Math.round((bid + ask) / 2) : null;
+    const v: number | null = close ?? mid ?? last;
+    if (v != null && c.end_period_ts != null) {
+      last = v;
+      points.push({ ts: c.end_period_ts, yesCents: v });
+    }
+  }
+  return points;
+}
+
 /** The ask (fill price) for a side, in cents, or null if not tradeable. */
 export function askForSide(q: Quote, side: Side): number | null {
   const ask = side === "YES" ? q.yesAskCents : q.noAskCents;
