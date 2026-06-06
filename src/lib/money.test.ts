@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   dollarsToCents,
-  centsToDollars,
   isTradeablePriceCents,
   orderCostCents,
   weightedAvgCostCents,
@@ -30,14 +29,6 @@ describe("dollarsToCents", () => {
     expect(dollarsToCents(undefined)).toBeNull();
     expect(dollarsToCents("abc")).toBeNull();
     expect(dollarsToCents("")).toBeNull();
-  });
-});
-
-describe("centsToDollars", () => {
-  it("formats cents as dollars", () => {
-    expect(centsToDollars(47)).toBe("0.47");
-    expect(centsToDollars(100)).toBe("1.00");
-    expect(centsToDollars(5)).toBe("0.05");
   });
 });
 

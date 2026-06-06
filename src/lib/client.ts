@@ -25,7 +25,7 @@ export type Market = {
 
 export type Side = "YES" | "NO";
 
-/** The single pre-provisioned demo account (self-signup is disabled for this demo). */
+/** The pre-provisioned demo account used by the dev seeder. */
 export const DEMO = { username: "demo", password: "onyx-demo-2026" } as const;
 
 export class ApiError extends Error {

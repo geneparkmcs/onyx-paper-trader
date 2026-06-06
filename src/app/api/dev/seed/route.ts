@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
 import { getMarkets } from "@/lib/marketsCache";
@@ -7,15 +7,11 @@ import { config } from "@/lib/config";
 import { DEMO } from "@/lib/client";
 import type { Side } from "@/lib/money";
 
-// Demo-data seeder. Open in dev; in production requires ?token=SEED_TOKEN. Creates a `demo`
-// user (password demo12345) with a handful of real positions placed through the live engine.
-export async function POST(req: NextRequest) {
-  const isProd = process.env.NODE_ENV === "production";
-  if (isProd) {
-    const token = req.nextUrl.searchParams.get("token");
-    if (!process.env.SEED_TOKEN || token !== process.env.SEED_TOKEN) {
-      return NextResponse.json({ error: "forbidden" }, { status: 403 });
-    }
+// Dev-only demo-data seeder: creates the `demo` user with positions placed through the live
+// order engine. Disabled in production — there is no seeding/admin surface in the prod app.
+export async function POST() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "not found" }, { status: 404 });
   }
 
   const username = DEMO.username;

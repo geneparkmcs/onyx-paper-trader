@@ -21,16 +21,6 @@ export function dollarsToCents(v: string | number | null | undefined): number | 
   return Math.round(n * 100);
 }
 
-/** Format integer cents as a dollar string: 47 -> "0.47". */
-export function centsToDollars(c: number): string {
-  return (c / 100).toFixed(2);
-}
-
-/** Implied probability (%) of a YES price. 47c -> 47%. */
-export function impliedProbabilityPct(yesCents: number): number {
-  return yesCents;
-}
-
 /** Midpoint of a bid/ask in cents, rounded; null if either side is missing. */
 export function midCents(bid: number | null, ask: number | null): number | null {
   if (bid == null || ask == null) return null;
