@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.gitignore
+*.db
+*.db-journal
+*.sqlite
+prisma/dev.db*
+prisma/test.db*
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+README.md
+DESIGN.md
