@@ -4,7 +4,8 @@ Paper-trade YES/NO on **live prediction-market prices**. Simulated orders fill i
 current upstream price and are recorded against your own balance, positions, and P&L — nothing
 ever hits a real venue.
 
-**Live:** https://onyx-paper-trader.fly.dev — demo login `demo` / `onyx-demo-2026` (or sign up).
+**Live:** https://onyx-paper-trader.fly.dev — sign up to start with $1,000, or use the demo
+account (credentials shared separately).
 
 - Auth with per-user balance, order history, and positions (seeded with $1,000).
 - Browse all liquid markets with search, category filters, and sort; **prices update live**.
@@ -21,8 +22,8 @@ cp .env.example .env          # set JWT_SECRET; DATABASE_URL defaults to a local
 npx prisma migrate dev        # create the SQLite db + schema
 npm run dev                   # http://localhost:3000
 
-npm test                      # 33 unit tests (money math + order engine)
-curl -X POST localhost:3000/api/dev/seed   # optional: create the `demo` user with positions
+npm test                      # 32 unit tests (money math + order engine)
+curl -X POST localhost:3000/api/dev/seed   # optional: seed the demo user (dev only; 404 in prod)
 ```
 
 ## Stack & key design decisions

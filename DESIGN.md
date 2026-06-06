@@ -279,14 +279,14 @@ Target: every §8 guarantee has a test that fails if it breaks. Pure-logic tests
 
 ## 11. Scope
 
-**v1 (build):** auth · seeded balance · browse + search/filter · live prices · market buy
-YES/NO with server price + idempotency + slippage protection · positions · unrealized P&L ·
-the §10 tests · deploy to Fly · README.
+**v1 (delivered):** auth · seeded balance · browse + search/filter/sort · live prices · price-
+history chart · market buy YES/NO with server price + idempotency + slippage protection ·
+positions · unrealized P&L · structured logging · the §10 tests · deployed to Fly · README.
 
-**Stretch (if clock allows):** close/sell at bid (realizes P&L) · limit orders.
+**Stretch (not built):** close/sell at bid (realizes P&L) · limit orders · AI position advisor.
 
-**Out of scope (name in README):** settlement/resolution payout · WebSocket feed ·
-multi-instance scaling · password reset · charts.
+**Out of scope (named in README):** settlement/resolution payout · WebSocket feed ·
+multi-instance scaling · password reset.
 
 ---
 
