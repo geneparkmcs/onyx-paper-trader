@@ -1,0 +1,52 @@
+// Paper-trading data model. Money is ALWAYS integer cents.
+// `fills` is the append-only source of truth; `positions` is a projection kept
+// in sync inside the same transaction as the fill (see DESIGN.md §4).
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  username     String     @unique
+  passwordHash String
+  balanceCents Int        @default(100000) // seed $1,000
+  createdAt    DateTime   @default(now())
+  fills        Fill[]
+  positions    Position[]
+}
+
+model Fill {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  ticker         String
+  side           String // "YES" | "NO"
+  qty            Int
+  fillPriceCents Int // snapshot of the exact price used
+  costCents      Int
+  idempotencyKey String
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, idempotencyKey]) // dedup enforced by the DB, not just app code
+  @@index([userId, createdAt])
+}
+
+model Position {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  ticker       String
+  side         String // "YES" | "NO"
+  qty          Int
+  avgCostCents Int
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, ticker, side])
+}
