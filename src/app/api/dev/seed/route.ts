@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/auth";
 import { getMarkets } from "@/lib/marketsCache";
 import { placeOrder } from "@/lib/orders";
 import { config } from "@/lib/config";
+import { DEMO } from "@/lib/client";
 import type { Side } from "@/lib/money";
 
 // Demo-data seeder. Open in dev; in production requires ?token=SEED_TOKEN. Creates a `demo`
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const username = "demo";
+  const username = DEMO.username;
   // Reset the demo user.
   const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
   const user = await prisma.user.create({
     data: {
       username,
-      passwordHash: await hashPassword("demo12345"),
+      passwordHash: await hashPassword(DEMO.password),
       balanceCents: config.seedBalanceCents,
     },
   });
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
 
   const fresh = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
   return NextResponse.json({
-    user: { username, password: "demo12345", balanceCents: fresh.balanceCents },
+    user: { username, password: DEMO.password, balanceCents: fresh.balanceCents },
     orders: results,
   });
 }

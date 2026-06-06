@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { mutate } from "swr";
-import { postJson, ApiError } from "@/lib/client";
+import { postJson, ApiError, DEMO } from "@/lib/client";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
@@ -15,12 +15,14 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   const isSignup = mode === "signup";
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  async function login(u: string, p: string) {
     setBusy(true);
     setError(null);
     try {
-      await postJson(isSignup ? "/api/auth/register" : "/api/auth/login", { username, password });
+      await postJson(isSignup ? "/api/auth/register" : "/api/auth/login", {
+        username: u,
+        password: p,
+      });
       await mutate("/api/auth/me");
       router.push("/");
     } catch (err) {
@@ -28,6 +30,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    await login(username, password);
   }
 
   return (
@@ -77,6 +84,23 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             {busy ? "…" : isSignup ? "Create account" : "Log in"}
           </button>
         </form>
+        {!isSignup && (
+          <div className="mt-4 rounded-lg border border-neutral-800 bg-neutral-950 p-3">
+            <div className="text-xs font-medium text-neutral-300 mb-1">Demo account</div>
+            <div className="font-mono text-xs text-neutral-400">
+              {DEMO.username} / {DEMO.password}
+            </div>
+            <button
+              type="button"
+              onClick={() => login(DEMO.username, DEMO.password)}
+              disabled={busy}
+              className="mt-2 w-full rounded-md border border-neutral-700 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800 disabled:opacity-40"
+            >
+              Use demo account
+            </button>
+          </div>
+        )}
+
         <div className="text-sm text-neutral-400 mt-4 text-center">
           {isSignup ? (
             <>
